@@ -155,3 +155,197 @@ function resetCount(){count=0;document.getElementById('number').textContent=coun
 </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#073d32">
+<title>الإيمان - القرآن الكريم</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f2;color:#173d32;font-family:Tahoma,Arial;padding-bottom:25px}
+header{background:linear-gradient(135deg,#073b30,#08765b);color:white;padding:24px 18px;border-radius:0 0 25px 25px}
+header h1{margin:0 0 8px;color:#f5d58b}
+header p{margin:0;font-size:13px}
+main{padding:16px;max-width:650px;margin:auto}
+.card{background:white;padding:17px;border-radius:18px;margin:14px 0;box-shadow:0 3px 14px #173d3210}
+label{display:block;font-weight:bold;margin:12px 0 8px}
+select,input{width:100%;padding:13px;border:1px solid #dce7df;border-radius:11px;background:#fff;font:inherit;color:#173d32}
+button{font:inherit;cursor:pointer}
+.play{width:100%;border:0;border-radius:12px;padding:14px;background:#087252;color:white;font-weight:bold;margin-top:12px}
+.secondary{border:0;border-radius:10px;padding:11px;background:#e5f1e9;color:#07533e}
+#status{font-size:13px;color:#71877d;line-height:1.8}
+.surah-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.surah{border:1px solid #e0eae3;background:white;border-radius:12px;padding:12px;text-align:right;color:#174638}
+.surah.selected{background:#e5f2e9;border-color:#087252}
+.surah small{display:block;color:#82938b;margin-top:5px}
+audio{width:100%;margin-top:15px}
+footer{text-align:center;color:#87958d;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h1>☪ الإيمان</h1>
+<p>القرآن الكريم - تلاوة خاشعة وقراءة متواصلة</p>
+</header>
+<main>
+<div class="card">
+<h2>📖 القرآن الكريم</h2>
+<p id="status">جاري تحميل القراء والسور...</p>
+
+<label for="reciter">اختر القارئ</label>
+<select id="reciter"><option value="">جاري تحميل القراء...</option></select>
+
+<label for="surah">اختر السورة</label>
+<select id="surah"><option value="">جاري تحميل السور...</option></select>
+
+<button class="play" id="play">▶ تشغيل السورة كاملة</button>
+<audio id="audio" controls preload="none"></audio>
+<p id="playing" style="font-size:13px;color:#087252"></p>
+</div>
+
+<div class="card">
+<h3>جميع سور القرآن الكريم</h3>
+<input id="search" placeholder="ابحث عن اسم السورة...">
+<div class="surah-list" id="surahList"></div>
+</div>
+</main>
+<footer>الإيمان - رفيق المسلم في كل يوم ☪️</footer>
+
+<script>
+const API="https://mp3quran.net/api/v3";
+let surahs=[];
+let reciters=[];
+let selectedReciter=null;
+let selectedMoshaf=null;
+let selectedSurah=1;
+
+const $=id=>document.getElementById(id);
+const audio=$("audio");
+
+function clean(s){return (s||"").trim().replace(/\s+/g," ")}
+
+async function loadData(){
+ try{
+  $("status").textContent="جاري تحميل بيانات القرآن الكريم...";
+  const [s,r]=await Promise.all([
+   fetch(API+"/suwar?language=ar"),
+   fetch(API+"/reciters?language=ar")
+  ]);
+  if(!s.ok||!r.ok)throw Error("تعذر الاتصال بالمصدر");
+  const sd=await s.json(),rd=await r.json();
+  surahs=sd.suwar||[];
+  reciters=rd.reciters||[];
+  if(!surahs.length||!reciters.length)throw Error("البيانات غير متاحة");
+  fillSurahs();
+  fillReciters();
+  renderList();
+  $("status").textContent="تم تحميل "+surahs.length+" سورة وعدد كبير من القراء. اختر القارئ والسورة.";
+ }catch(e){
+  $("status").textContent="تعذر تحميل البيانات. تأكد من اتصال الإنترنت ثم أعد تحميل الصفحة.";
+ }
+}
+
+function fillSurahs(){
+ const select=$("surah");
+ select.innerHTML="";
+ surahs.forEach(s=>{
+  const o=document.createElement("option");
+  o.value=s.id;o.textContent=s.id+" - "+clean(s.name);
+  select.appendChild(o);
+ });
+ select.value=selectedSurah;
+}
+
+function fillReciters(){
+ const select=$("reciter");
+ select.innerHTML="";
+ reciters.forEach(r=>{
+  (r.moshaf||[]).forEach(m=>{
+   if(!m.server||!m.surah_list)return;
+   const o=document.createElement("option");
+   o.value=r.id+"|"+m.id;
+   o.textContent=clean(r.name)+" - "+clean(m.name);
+   o.dataset.server=m.server;
+   o.dataset.list=m.surah_list;
+   select.appendChild(o);
+  });
+ });
+ if(!select.options.length){
+  $("status").textContent="لا توجد تسجيلات متاحة حاليًا.";
+  return;
+ }
+ select.selectedIndex=0;
+ chooseReciter();
+}
+
+function chooseReciter(){
+ const o=$("reciter").selectedOptions[0];
+ if(!o)return;
+ selectedReciter=o.value;
+ selectedMoshaf={
+  server:o.dataset.server,
+  list:(o.dataset.list||"").split(",").map(Number)
+ };
+ renderList();
+}
+
+function renderList(){
+ const box=$("surahList");
+ const term=$("search").value.trim();
+ box.innerHTML="";
+ surahs.filter(s=>clean(s.name).includes(term)).forEach(s=>{
+  const b=document.createElement("button");
+  b.className="surah"+(Number(s.id)===Number(selectedSurah)?" selected":"");
+  b.innerHTML="<b>"+s.id+". "+clean(s.name)+"</b><small>"+(Number(s.makkia)===1?"مكية":"مدنية")+"</small>";
+  b.onclick=()=>selectSurah(s.id);
+  box.appendChild(b);
+ });
+}
+
+function selectSurah(id){
+ selectedSurah=Number(id);
+ $("surah").value=String(id);
+ renderList();
+ playSurah();
+}
+
+function playSurah(){
+ if(!selectedMoshaf){$("status").textContent="اختر القارئ أولًا.";return}
+ if(!selectedMoshaf.list.includes(selectedSurah)){
+  $("status").textContent="هذه السورة غير متاحة لهذا المصحف. اختر قارئًا آخر.";
+  return;
+ }
+ const url=selectedMoshaf.server.replace(/\/?$/,"/")+String(selectedSurah).padStart(3,"0")+".mp3";
+ audio.pause();
+ audio.src=url;
+ audio.load();
+ audio.play().then(()=>{
+  const name=surahs.find(s=>Number(s.id)===selectedSurah);
+  $("playing").textContent="يُتلى الآن: سورة "+clean(name?.name);
+  $("status").textContent="التلاوة تعمل من ملف السورة الكامل.";
+ }).catch(()=>{
+  $("status").textContent="اضغط زر التشغيل داخل مشغل الصوت لبدء التلاوة، أو تحقق من اتصال الإنترنت.";
+ });
+}
+
+$("reciter").addEventListener("change",chooseReciter);
+$("surah").addEventListener("change",e=>selectSurah(e.target.value));
+$("play").addEventListener("click",playSurah);
+$("search").addEventListener("input",renderList);
+
+audio.addEventListener("ended",()=>{
+ const next=surahs.find(s=>Number(s.id)===selectedSurah+1);
+ if(next&&selectedMoshaf.list.includes(Number(next.id))){
+  selectSurah(next.id);
+ }else{
+  $("playing").textContent="انتهت السورة.";
+ }
+});
+
+loadData();
+</script>
+</body>
+</html>
