@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#073d32">
+<title>الإيمان - رفيق المسلم</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f2;color:#18352d;font-family:Tahoma,Arial,sans-serif;padding-bottom:85px}
+header{background:linear-gradient(140deg,#063b30,#08745a);color:white;padding:25px 20px 35px;border-radius:0 0 28px 28px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:bold;color:#f4d58b}
+.date{font-size:13px;color:#d8e8df;margin-top:20px}
+h1{font-size:22px;margin:12px 0 5px}
+.sub{font-size:13px;color:#d7e9df}
+.next{background:#fff;color:#174538;margin-top:24px;border-radius:18px;padding:18px;box-shadow:0 5px 18px #001b171c}
+.next small{color:#71877e}
+.next strong{display:block;font-size:25px;margin:10px 0;color:#07543f}
+.count{color:#b18a3d;font-weight:bold}
+main{padding:18px}
+.section-title{font-size:18px;font-weight:bold;margin:20px 0 14px}
+.prayers{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.prayer{background:white;border-radius:14px;text-align:center;padding:14px 5px;box-shadow:0 3px 12px #18352d0c}
+.prayer span{display:block;font-size:21px;margin-bottom:8px}
+.prayer b{font-size:14px}
+.prayer small{display:block;color:#7c8e86;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.item{background:white;border-radius:17px;padding:17px 12px;min-height:105px;border:1px solid #e7eee8;text-align:center;cursor:pointer}
+.item span{font-size:28px;display:block;margin-bottom:9px}
+.item b{font-size:14px}
+.item:active{background:#e5f2eb}
+.quote{background:#e4efe6;border-radius:17px;padding:18px;line-height:2;text-align:center;margin-top:18px;color:#285844}
+nav{position:fixed;bottom:0;right:0;left:0;background:#fff;display:flex;justify-content:space-around;padding:10px 3px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -3px 15px #00000012}
+nav button{border:0;background:none;color:#75877f;font-size:11px;cursor:pointer}
+nav button span{display:block;font-size:21px;margin-bottom:4px}
+nav button.active{color:#087252;font-weight:bold}
+.page{display:none}
+.page.active{display:block}
+.back{border:0;background:#e4efe6;color:#07543f;padding:10px 16px;border-radius:12px;margin-bottom:15px}
+@media(min-width:600px){body{max-width:480px;margin:auto;box-shadow:0 0 30px #0001;min-height:100vh}nav{max-width:480px;margin:auto}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top">
+  <div class="logo">☪ الإيمان</div>
+  <div>🔔</div>
+ </div>
+ <div class="date" id="date"></div>
+ <h1>السلام عليكم ورحمة الله وبركاته</h1>
+ <div class="sub">رفيق المسلم في كل يوم</div>
+ <div class="next">
+  <small>الصلاة القادمة</small>
+  <strong id="nextPrayer">الفجر</strong>
+  <div class="count" id="countdown">نسأل الله أن يتقبل صلاتكم</div>
+ </div>
+</header>
+
+<main>
+ <section class="page active" id="home">
+  <div class="section-title">🕌 مواقيت الصلاة</div>
+  <div class="prayers">
+   <div class="prayer"><span>🌅</span><b>الفجر</b><small>--:--</small></div>
+   <div class="prayer"><span>☀️</span><b>الشروق</b><small>--:--</small></div>
+   <div class="prayer"><span>🌤️</span><b>الظهر</b><small>--:--</small></div>
+   <div class="prayer"><span>🌇</span><b>العصر</b><small>--:--</small></div>
+   <div class="prayer"><span>🌆</span><b>المغرب</b><small>--:--</small></div>
+   <div class="prayer"><span>🌙</span><b>العشاء</b><small>--:--</small></div>
+  </div>
+  <div class="section-title">✨ خدمات الإيمان</div>
+  <div class="grid">
+   <div class="item" onclick="showPage('quran')"><span>📖</span><b>القرآن الكريم</b></div>
+   <div class="item" onclick="showPage('azkar')"><span>📿</span><b>الأذكار</b></div>
+   <div class="item" onclick="showPage('prayer')"><span>🕌</span><b>الأذان والصلاة</b></div>
+   <div class="item" onclick="showPage('qibla')"><span>🧭</span><b>القبلة</b></div>
+   <div class="item" onclick="showPage('tasbeeh')"><span>📿</span><b>السبحة</b></div>
+   <div class="item" onclick="showPage('ramadan')"><span>🌙</span><b>رمضان 2027</b></div>
+   <div class="item" onclick="showPage('duaa')"><span>🤲</span><b>الأدعية</b></div>
+   <div class="item" onclick="showPage('about')"><span>💚</span><b>عن التطبيق</b></div>
+  </div>
+  <div class="quote">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</div>
+ </section>
+
+ <section class="page" id="quran">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">📖 القرآن الكريم</div>
+  <p>قريبًا: القرآن الكريم كاملًا، 114 سورة، مع مجموعة من القراء والتلاوة المتواصلة.</p>
+  <p>مشاري العفاسي • محمود خليل الحصري • محمد صديق المنشاوي • محمد الطبلاوي</p>
+ </section>
+ <section class="page" id="azkar">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">📿 الأذكار</div>
+  <p>أذكار الصباح والمساء والنوم وبعد الصلاة ستكون متاحة هنا.</p>
+ </section>
+ <section class="page" id="prayer">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">🕌 الأذان والصلاة</div>
+  <p>إعداد مواقيت الصلاة والأذان والإقامة للمقطم - القاهرة.</p>
+ </section>
+ <section class="page" id="qibla">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">🧭 اتجاه القبلة</div>
+  <p>سيتم إضافة بوصلة القبلة في المرحلة القادمة.</p>
+ </section>
+ <section class="page" id="tasbeeh">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">📿 السبحة الإلكترونية</div>
+  <div style="text-align:center;padding:25px">
+   <div id="number" style="font-size:55px;color:#087252">0</div>
+   <button onclick="increment()" style="border:0;border-radius:50%;width:130px;height:130px;background:#087252;color:white;font-size:22px">سبّح</button>
+   <p><button onclick="resetCount()">إعادة العداد</button></p>
+  </div>
+ </section>
+ <section class="page" id="ramadan">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">🌙 رمضان 2027</div>
+  <p>الإمساكية ومواعيد الإفطار والإمساك ومدفع الإفطار والمسحراتي.</p>
+ </section>
+ <section class="page" id="duaa">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">🤲 الأدعية</div>
+  <p>مكتبة الأدعية والأحاديث وأسماء الله الحسنى.</p>
+ </section>
+ <section class="page" id="about">
+  <button class="back" onclick="showPage('home')">رجوع للرئيسية</button>
+  <div class="section-title">☪ عن تطبيق الإيمان</div>
+  <p>الإيمان - رفيق المسلم في كل يوم.</p>
+  <p>تطبيق مجاني لخدمة المسلم.</p>
+ </section>
+</main>
+
+<nav>
+ <button class="active" onclick="showPage('home',this)"><span>⌂</span>الرئيسية</button>
+ <button onclick="showPage('quran',this)"><span>📖</span>القرآن</button>
+ <button onclick="showPage('prayer',this)"><span>🕌</span>الصلاة</button>
+ <button onclick="showPage('azkar',this)"><span>📿</span>الأذكار</button>
+ <button onclick="showPage('tasbeeh',this)"><span>☰</span>المزيد</button>
+</nav>
+<script>
+document.getElementById('date').textContent =
+ new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date());
+
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ if(btn) btn.classList.add('active');
+ window.scrollTo(0,0);
+}
+let count=0;
+function increment(){count++;document.getElementById('number').textContent=count;}
+function resetCount(){count=0;document.getElementById('number').textContent=count;}
+</script>
+</body>
+</html>
